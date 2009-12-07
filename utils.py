@@ -218,6 +218,20 @@ def get_tag(tag):
 # Font size distribution algorithms
 LOGARITHMIC, LINEAR = 1, 2
 
+def _calculate_min_max_weight(tags, distribution):
+    """
+    Returns minimum and maximum weight of list of tags.
+    """
+    counts = [tag.count for tag in tags]
+    if distribution == LOGARITHMIC:
+        min_weight = math.log(min(counts))
+        max_weight = math.log(max(counts))
+    else:
+        min_weight = float(min(counts))                
+        max_weight = float(max(counts))
+
+    return (min_weight, max_weight)
+
 def _calculate_tag_weight(weight, min_weight, max_weight, distribution):
     """
     Logarithmic tag weight calculation is based on code from the
@@ -243,11 +257,12 @@ def calculate_cloud(tags, steps=4, distribution=LOGARITHMIC):
     ``distribution`` defines the type of font size distribution
     algorithm which will be used - logarithmic or linear. It must be
     one of ``tagging.utils.LOGARITHMIC`` or ``tagging.utils.LINEAR``.
-    """
-    if len(tags) > 0:
-        counts = [tag.count for tag in tags]
-        min_weight = math.log(min(counts)) if distribution == LOGARITHMIC else float(min(counts))
-        max_weight = math.log(max(counts)) if distribution == LOGARITHMIC else float(max(counts))
+    """                                                         
+    if len(tags) == 1:
+        # Optimization for single tag - just set font size to minimum step
+        tags[0].font_size = 1
+    elif len(tags) > 1:            
+        min_weight, max_weight = _calculate_min_max_weight(tags, distribution)
         for tag in tags:
             tag_weight = _calculate_tag_weight(tag.count, min_weight, max_weight, distribution)
             tag.font_size = int(tag_weight * (steps - 1)) + 1
