@@ -239,7 +239,9 @@ def _calculate_tag_weight(weight, min_weight, max_weight, distribution):
 
     .. _`Tag Cloud`: http://www.artweb-design.de/projects/mephisto-plugin-tag-cloud
     """
-    if distribution == LINEAR or max_weight == 1:
+    if min_weight == max_weight:
+        return min_weight
+    elif distribution == LINEAR:
         return (weight - min_weight) / (max_weight - min_weight)
     elif distribution == LOGARITHMIC:
         return (math.log(weight) - min_weight) / (max_weight - min_weight)
